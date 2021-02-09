@@ -1,6 +1,6 @@
 ###calc_invest_times.py#########
 #rename as check_orientation
-def check_orientation_single(df, index_loc, extra_coords):
+def check_orientation(df, index_loc, extra_coords):
 
     import numpy as np
 
