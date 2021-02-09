@@ -327,26 +327,40 @@ main_heatmap_generator_btn = Button(tab_frame, text = '4: Heatmaps', command = s
 
 ######### Button for Step 5, which is the main calculation and analysis based on ROIs #########
 
-def calculate_investigation_times(bodypart = 'nose'):
+global video_suffix
+global behavior_type
+#video_suffix = simpledialog.askstring('DLC_resnet50_social_behavior_allMay27shuffle1_250000', 'What is the DLC suffix?')
+#trying to get video_suffix without needing to ask for it
+csv_direc = os.path.join(main_dir, processed_csv_output_folder)
+first_vid = os.listdir(csv_direc)[0]
+video_suffix_start = first_vid.index("DLC")
+video_suffix = first_vid[video_suffix_start: len(first_vid)]
 
-    global video_suffix
-    global behavior_type
-    #video_suffix = simpledialog.askstring('DLC_resnet50_social_behavior_allMay27shuffle1_250000', 'What is the DLC suffix?')
-    #trying to get video_suffix without needing to ask for it
-    csv_direc = os.path.join(main_dir, processed_csv_output_folder)
-    first_vid = os.listdir(csv_direc)[0]
-    video_suffix_start = first_vid.index("DLC")
-    video_suffix = first_vid[video_suffix_start: len(first_vid)]
+#should try to calculate investigation times for both social and novel
+behavior_type = simpledialog.askstring('Choose behavior type', 'Which behavior would you like to analyze? (Social or Novel)')
+final_dict = {}
 
-    #should try to calculate investigation times for both social and novel
-    behavior_type = simpledialog.askstring('Choose behavior type', 'Which behavior would you like to analyze? (Social or Novel)')
-    final_dict = {}
+frame_val_dir = os.path.join(main_dir, "frame_values")
+if not os.path.exists(frame_val_dir):
+    os.mkdir(frame_val_dir)
 
-    frame_val_dir = os.path.join(main_dir, "frame_values")
-    if not os.path.exists(frame_val_dir):
-        os.mkdir(frame_val_dir)
+###What info do we need inside the function?
 
+# 1. bodypart
+# 2. video_suffix?
+# 3. frame_val_dir?
+# 4. df_times
+
+#single version: def calculate_investigation_times_single(df, possible_places, extra_coords):
+
+
+
+def calculate_investigation_times(bodypart = 'nose',):
+
+    #iterate through each video
     for i in range(len(df_times)):
+
+        ###could probably paste in the single version here?
  
         ### first we will want to get the right dataframe, so we should import it based on the df_times location and clean it
 
@@ -354,7 +368,9 @@ def calculate_investigation_times(bodypart = 'nose'):
         #should be able to cut from 346 to 415 and use single
         bodyparts = np.unique(df.columns.get_level_values(0))        
 
-        #changed so that all the frames are included
+        #TODO change so that all the frames are included
+        #I think this is cutting df by the start and stop times for video i
+        # maybe something like int_df = df[:][i] would work to just split df by video i 
         int_df = df.loc[df_times['Start' + behavior_type + 'Frames'][i]:df_times['Stop' + behavior_type + 'Frames'][i]]
         
 
@@ -364,7 +380,7 @@ def calculate_investigation_times(bodypart = 'nose'):
         arr = np.zeros(shape = (len(int_df), len(bodyparts), len(possible_places)))
 
         ### now we should check the coordinates of each bodypart in each frame
-        
+        ### Below starts to look a lot like the single version
         print('Loading in bodypart coordinates for each frame')
         for row in tqdm(range(len(int_df))):
             for j in range(len(bodyparts)):
